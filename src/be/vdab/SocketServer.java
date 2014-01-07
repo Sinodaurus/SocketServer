@@ -1,0 +1,45 @@
+package be.vdab;
+
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+public class SocketServer {
+	public static void main(String[] args) throws IOException{
+		//int portNumber = Integer.parseInt(args[0]);
+		int portNumber = 8082;
+		int clientNumber = 0;
+
+		try (ServerSocket serverSocket = new ServerSocket(portNumber)) {
+			while (true) {
+				Socket client = serverSocket.accept();
+				ClientHandler c = new ClientHandler(client);
+				System.out.println("Client number " + ++clientNumber);
+				c.start();
+			}
+		} catch (IOException e) {
+		}
+
+		
+		
+		
+		// try (ServerSocket serverSocket = new ServerSocket(portNumber);
+		// Socket clientSocket = serverSocket.accept();
+		// PrintWriter out = new PrintWriter(
+		// clientSocket.getOutputStream(), true);
+		// BufferedReader in = new BufferedReader(new InputStreamReader(
+		// clientSocket.getInputStream()));) {
+		//
+		// out.println("eerste post");
+		// while (in.readLine() != null) {
+		// out.println("testie");
+		// }
+		//
+		// } catch (IOException e) {
+		// System.out
+		// .println("Exception caught when trying to listen on port "
+		// + portNumber + " or listening for a connection");
+		// System.out.println(e.getMessage());
+		// }
+	}
+}
