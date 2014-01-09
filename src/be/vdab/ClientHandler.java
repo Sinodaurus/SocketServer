@@ -1,25 +1,24 @@
 package be.vdab;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ClientHandler extends Thread {
 	protected Socket socket;
-	protected DataInputStream input;
-	protected DataOutputStream output;
+	protected BufferedReader input;
+	protected PrintWriter output;
+	protected String userName;
 
-	public ClientHandler(Socket socket) throws IOException {
+	public ClientHandler(Socket socket, String userName) throws IOException {
 		this.socket = socket;
-		input = new DataInputStream(new BufferedInputStream(
-				socket.getInputStream()));
-		output = new DataOutputStream(new BufferedOutputStream(
-				socket.getOutputStream()));
+		this.userName = userName;
+		input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+		output = new PrintWriter(socket.getOutputStream());
 	}
 
 	protected static List<ClientHandler> handlers = new ArrayList<>();
@@ -28,8 +27,8 @@ public class ClientHandler extends Thread {
 		try {
 			handlers.add(this);
 			while (true) {
-				String msg = input.readUTF();
-				System.out.println("incoming message" + msg);
+				String msg = input.readLine();
+				System.out.println("incoming message: " + msg);
 				broadcast(msg);
 			}
 		} catch (IOException e) {
@@ -47,16 +46,11 @@ public class ClientHandler extends Thread {
 	protected static void broadcast(String message) {
 		synchronized (handlers) {
 			for (ClientHandler clientHandler : handlers) {
-				try {
 					synchronized (clientHandler.output) {
-						System.out.println("broadcasting " + message);
-						clientHandler.output.writeUTF(message);
+						System.out.println("broadcasting: " + message);
+						clientHandler.output.println(message);
 					}
 					clientHandler.output.flush();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-
 			}
 		}
 	}
